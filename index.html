@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Climate Intelligence Dashboard</title>
+
+  <!-- =============================================
+       DEPENDENCIES
+       - Tailwind CSS (CDN) : utility-first styling
+       - Chart.js (CDN)     : sparkline / trend chart
+       ============================================= -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    /* Tailwind dark-mode & brand colour extension */
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            teal:  { DEFAULT: '#0A7C6E', light: '#0d9e8d', dark: '#086358' },
+            amber: { DEFAULT: '#F59E0B', light: '#fbbf24', dark: '#d97706' },
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- Custom stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<!-- =============================================
+     BODY — dark background base
+     ============================================= -->
+<body class="bg-gray-950 text-gray-100 min-h-screen flex">
+
+  <!-- =============================================
+       SIDEBAR NAVIGATION
+       ============================================= -->
+  <aside id="sidebar" class="sidebar" aria-label="Sidebar navigation">
+
+    <!-- Brand logo -->
+    <div class="sidebar-brand">
+      <!-- Leaf icon -->
+      <span class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 8C8 10 5.9 16.17 3.82 19.69 3.37 20.49 4.2 21 5 20.5
+                   C8 18.5 11 17 14 17c5 0 8-3 8-8V7a1 1 0 0 0-1-1
+                   C17 6 10 8 6 14"/>
+        </svg>
+      </span>
+      <span class="brand-name">ClimateIQ</span>
+    </div>
+
+    <!-- Primary nav links -->
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+      <span class="nav-section-label">OVERVIEW</span>
+
+      <a href="#" class="nav-link nav-link--active" aria-current="page">
+        <!-- Dashboard icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="#" class="nav-link">
+        <!-- Globe icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10
+                   15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span>Global Map</span>
+      </a>
+
+      <span class="nav-section-label">ANALYTICS</span>
+
+      <a href="#" class="nav-link">
+        <!-- Trend icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span>Climate Trends</span>
+      </a>
+
+      <a href="#" class="nav-link">
+        <!-- Alert icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3
+                   L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>Disaster Alerts</span>
+        <span class="nav-badge">3</span>
+      </a>
+
+      <a href="#" class="nav-link">
+        <!-- Leaf / sustainability icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22V12M2 7l10 5 10-5M2 12l10 5 10-5M2 17l10 5 10-5"/>
+        </svg>
+        <span>Sustainability</span>
+      </a>
+
+      <span class="nav-section-label">REPORTS</span>
+
+      <a href="#" class="nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span>Reports</span>
+      </a>
+
+      <a href="#" class="nav-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+        </svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar footer — region selector -->
+    <div class="sidebar-footer">
+      <span class="text-xs text-gray-500 uppercase tracking-widest">Region</span>
+      <select class="sidebar-select" aria-label="Select region">
+        <option>🌍 Global</option>
+        <option>🌎 Americas</option>
+        <option>🌏 Asia-Pacific</option>
+        <option>🇪🇺 Europe</option>
+        <option>🌍 Africa</option>
+      </select>
+    </div>
+  </aside>
+
+  <!-- =============================================
+       MAIN CONTENT AREA
+       ============================================= -->
+  <div class="main-wrapper">
+
+    <!-- =========================================
+         TOP HEADER
+         ========================================= -->
+    <header class="top-header">
+      <!-- Mobile menu toggle -->
+      <button id="sidebar-toggle" class="mobile-menu-btn" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      <!-- Page breadcrumb -->
+      <div class="header-breadcrumb">
+        <span class="text-gray-500 text-sm">ClimateIQ</span>
+        <svg class="w-3 h-3 text-gray-600" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span class="text-sm font-semibold text-gray-200">Dashboard</span>
+      </div>
+
+      <!-- Header right: search, notifications, profile -->
+      <div class="header-right">
+        <!-- Last updated -->
+        <span class="last-updated">
+          <span class="live-dot"></span>
+          Live · Updated <time id="last-update-time">just now</time>
+        </span>
+
+        <!-- Notification bell -->
+        <button class="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="notif-dot"></span>
+        </button>
+
+        <!-- Admin avatar -->
+        <button class="avatar-btn" aria-label="Profile menu">
+          <span class="avatar-initials">AK</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- =========================================
+         PAGE CONTENT
+         ========================================= -->
+    <main class="page-content">
+
+      <!-- Page title row -->
+      <div class="page-title-row">
+        <div>
+          <h1 class="page-title">Climate Intelligence</h1>
+          <p class="page-subtitle">Real-time planetary health metrics · 2024</p>
+        </div>
+        <div class="flex gap-2 items-center">
+          <button class="btn-secondary">Export PDF</button>
+          <button class="btn-primary">+ Add Widget</button>
+        </div>
+      </div>
+
+      <!-- =======================================
+           DISASTER ALERTS BANNER
+           ======================================= -->
+      <section aria-label="Active disaster alerts" class="alerts-banner">
+        <div class="alerts-banner__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3
+                     L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <span class="alerts-banner__label">ACTIVE ALERTS</span>
+        <div class="alerts-banner__items">
+          <span class="alert-pill alert-pill--red">🌀 Typhoon Mawar · Philippines</span>
+          <span class="alert-pill alert-pill--orange">🔥 Wildfire · Alberta, CA</span>
+          <span class="alert-pill alert-pill--yellow">🌊 Flood Watch · Bangladesh</span>
+        </div>
+        <a href="#" class="alerts-banner__link">View all →</a>
+      </section>
+
+      <!-- =======================================
+           KPI CARDS (4 columns)
+           ======================================= -->
+      <section aria-label="Key Performance Indicators" class="kpi-grid">
+
+        <!-- KPI 1: Global Temperature -->
+        <article class="kpi-card">
+          <div class="kpi-card__header">
+            <div class="kpi-icon kpi-icon--red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+              </svg>
+            </div>
+            <span class="kpi-trend kpi-trend--up">▲ +0.3°C YoY</span>
+          </div>
+          <p class="kpi-label">Global Temperature</p>
+          <p class="kpi-value">+1.2<span class="kpi-unit">°C</span></p>
+          <p class="kpi-desc">Above pre-industrial baseline</p>
+          <div class="kpi-bar">
+            <div class="kpi-bar__fill kpi-bar__fill--red" style="width:60%"></div>
+          </div>
+          <p class="kpi-bar-label"><span>0°C</span><span>2°C target</span></p>
+        </article>
+
+        <!-- KPI 2: CO₂ Concentration -->
+        <article class="kpi-card">
+          <div class="kpi-card__header">
+            <div class="kpi-icon kpi-icon--amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/>
+              </svg>
+            </div>
+            <span class="kpi-trend kpi-trend--up">▲ +2.4 ppm YoY</span>
+          </div>
+          <p class="kpi-label">CO₂ Concentration</p>
+          <p class="kpi-value">421<span class="kpi-unit">ppm</span></p>
+          <p class="kpi-desc">Atmospheric CO₂ level</p>
+          <div class="kpi-bar">
+            <div class="kpi-bar__fill kpi-bar__fill--amber" style="width:84%"></div>
+          </div>
+          <p class="kpi-bar-label"><span>280 ppm</span><span>450 ppm</span></p>
+        </article>
+
+        <!-- KPI 3: Renewable Energy Share -->
+        <article class="kpi-card">
+          <div class="kpi-card__header">
+            <div class="kpi-icon kpi-icon--teal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+            </div>
+            <span class="kpi-trend kpi-trend--down">▼ +3.1% YoY</span>
+          </div>
+          <p class="kpi-label">Renewable Energy</p>
+          <p class="kpi-value">34.7<span class="kpi-unit">%</span></p>
+          <p class="kpi-desc">Global energy mix share</p>
+          <div class="kpi-bar">
+            <div class="kpi-bar__fill kpi-bar__fill--teal" style="width:34.7%"></div>
+          </div>
+          <p class="kpi-bar-label"><span>0%</span><span>100% goal</span></p>
+        </article>
+
+        <!-- KPI 4: Climate Risk Index -->
+        <article class="kpi-card">
+          <div class="kpi-card__header">
+            <div class="kpi-icon kpi-icon--violet">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <span class="kpi-trend kpi-trend--up">▲ +0.4 YoY</span>
+          </div>
+          <p class="kpi-label">Climate Risk Index</p>
+          <p class="kpi-value">6.8<span class="kpi-unit">/10</span></p>
+          <p class="kpi-desc">Composite vulnerability score</p>
+          <div class="kpi-bar">
+            <div class="kpi-bar__fill kpi-bar__fill--violet" style="width:68%"></div>
+          </div>
+          <p class="kpi-bar-label"><span>0</span><span>10 (critical)</span></p>
+        </article>
+
+      </section>
+
+      <!-- =======================================
+           MAIN LOWER GRID: Chart + Sustainability
+           ======================================= -->
+      <div class="lower-grid">
+
+        <!-- CLIMATE TREND CHART -->
+        <section class="dash-card dash-card--large" aria-label="Climate trend chart">
+          <div class="dash-card__header">
+            <div>
+              <h2 class="dash-card__title">Climate Trend</h2>
+              <p class="dash-card__subtitle">Temperature anomaly & CO₂ (2015–2024)</p>
+            </div>
+            <div class="chart-controls">
+              <button class="chip chip--active">10Y</button>
+              <button class="chip">5Y</button>
+              <button class="chip">1Y</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="climate-chart" aria-label="Climate trend line chart"></canvas>
+          </div>
+        </section>
+
+        <!-- SUSTAINABILITY PROGRESS TRACKER -->
+        <section class="dash-card" aria-label="Sustainability progress">
+          <div class="dash-card__header">
+            <div>
+              <h2 class="dash-card__title">Sustainability Goals</h2>
+              <p class="dash-card__subtitle">2030 SDG targets</p>
+            </div>
+            <span class="badge-teal">On Track</span>
+          </div>
+
+          <div class="progress-list">
+            <!-- Goal item -->
+            <div class="progress-item">
+              <div class="progress-item__info">
+                <span class="progress-item__label">Carbon Neutrality</span>
+                <span class="progress-item__value text-red-400">42%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill--red" style="width:42%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-item__info">
+                <span class="progress-item__label">Renewable Adoption</span>
+                <span class="progress-item__value text-teal-400">69%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill--teal" style="width:69%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-item__info">
+                <span class="progress-item__label">Deforestation Halt</span>
+                <span class="progress-item__value text-amber-400">55%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill--amber" style="width:55%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-item__info">
+                <span class="progress-item__label">Ocean Protection</span>
+                <span class="progress-item__value text-blue-400">38%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill--blue" style="width:38%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-item__info">
+                <span class="progress-item__label">EV Fleet Transition</span>
+                <span class="progress-item__value text-teal-400">73%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill--teal" style="width:73%"></div>
+              </div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-item__info">
+                <span class="progress-item__label">Clean Water Access</span>
+                <span class="progress-item__value text-blue-400">81%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill progress-fill--blue" style="width:81%"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div><!-- /lower-grid -->
+
+      <!-- =======================================
+           RECENT NEWS CARDS
+           ======================================= -->
+      <section aria-label="Recent climate news" class="news-section">
+        <div class="section-header">
+          <h2 class="section-title">Recent Climate News</h2>
+          <a href="#" class="section-link">View all →</a>
+        </div>
+
+        <div class="news-grid">
+
+          <article class="news-card">
+            <div class="news-card__tag news-card__tag--red">EXTREME WEATHER</div>
+            <h3 class="news-card__title">Record heatwave sweeps Southern Europe for third consecutive week</h3>
+            <p class="news-card__body">
+              Temperatures surpassing 47°C were recorded in Spain and Italy, putting
+              pressure on power grids and triggering Level 4 health alerts.
+            </p>
+            <footer class="news-card__footer">
+              <span class="news-card__source">Reuters Climate</span>
+              <time class="news-card__date">2 hours ago</time>
+            </footer>
+          </article>
+
+          <article class="news-card">
+            <div class="news-card__tag news-card__tag--teal">RENEWABLE</div>
+            <h3 class="news-card__title">Solar capacity installations break global record in Q2 2024</h3>
+            <p class="news-card__body">
+              Global solar installations reached 142 GW in a single quarter,
+              surpassing all previous records as panel costs fell below $0.20/W.
+            </p>
+            <footer class="news-card__footer">
+              <span class="news-card__source">IEA Report</span>
+              <time class="news-card__date">5 hours ago</time>
+            </footer>
+          </article>
+
+          <article class="news-card">
+            <div class="news-card__tag news-card__tag--amber">POLICY</div>
+            <h3 class="news-card__title">G20 nations agree on binding 2035 methane reduction targets</h3>
+            <p class="news-card__body">
+              In a landmark agreement, G20 countries committed to a 40% reduction
+              in methane emissions by 2035, covering agriculture, oil, and gas sectors.
+            </p>
+            <footer class="news-card__footer">
+              <span class="news-card__source">UN Climate</span>
+              <time class="news-card__date">1 day ago</time>
+            </footer>
+          </article>
+
+          <article class="news-card">
+            <div class="news-card__tag news-card__tag--blue">OCEAN</div>
+            <h3 class="news-card__title">Arctic sea-ice extent reaches lowest September average on record</h3>
+            <p class="news-card__body">
+              Scientists confirm September 2024 sea-ice extent is 12% below the 2012
+              record minimum, accelerating feedback loops in the Arctic system.
+            </p>
+            <footer class="news-card__footer">
+              <span class="news-card__source">NSIDC</span>
+              <time class="news-card__date">2 days ago</time>
+            </footer>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- =======================================
+           ADMIN PROFILE SECTION
+           ======================================= -->
+      <section aria-label="Admin profile" class="profile-section">
+
+        <div class="profile-card">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar">AK</div>
+            <span class="profile-status-dot"></span>
+          </div>
+          <div class="profile-info">
+            <h3 class="profile-name">Dr. Amara Khan</h3>
+            <p class="profile-role">Senior Climate Analyst</p>
+            <p class="profile-org">UN Environment Programme</p>
+          </div>
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-value">142</span>
+              <span class="stat-label">Reports</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">28</span>
+              <span class="stat-label">Projects</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">5.2K</span>
+              <span class="stat-label">Followers</span>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn-primary btn-sm">Edit Profile</button>
+            <button class="btn-secondary btn-sm">Log Out</button>
+          </div>
+        </div>
+
+        <!-- Quick action tiles -->
+        <div class="quick-actions">
+          <h3 class="quick-actions__title">Quick Actions</h3>
+          <div class="quick-actions__grid">
+            <button class="qa-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Upload Data
+            </button>
+            <button class="qa-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              New Report
+            </button>
+            <button class="qa-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Search Data
+            </button>
+            <button class="qa-tile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+              </svg>
+              Configure
+            </button>
+          </div>
+        </div>
+
+      </section><!-- /profile-section -->
+
+    </main><!-- /page-content -->
+  </div><!-- /main-wrapper -->
+
+  <!-- =============================================
+       INLINE SCRIPTS
+       - Chart.js initialisation
+       - Mobile sidebar toggle
+       - Live clock
+       ============================================= -->
+  <script>
+    /* ---- Climate Trend Line Chart ---- */
+    (function () {
+      const labels = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'];
+      const tempData  = [0.90, 1.01, 0.92, 0.85, 0.98, 1.02, 0.85, 1.04, 1.17, 1.20];
+      const co2Data   = [400,  404,  406,  408,  411,  413,  415,  418,  420,  421 ];
+
+      const ctx = document.getElementById('climate-chart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Temp Anomaly (°C)',
+              data: tempData,
+              yAxisID: 'yTemp',
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239,68,68,0.08)',
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              fill: true,
+              tension: 0.4,
+            },
+            {
+              label: 'CO₂ (ppm)',
+              data: co2Data,
+              yAxisID: 'yCO2',
+              borderColor: '#F59E0B',
+              backgroundColor: 'rgba(245,158,11,0.08)',
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              fill: true,
+              tension: 0.4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              labels: { color: '#9ca3af', font: { size: 12 }, boxWidth: 12 }
+            },
+            tooltip: { backgroundColor: '#1f2937', titleColor: '#f9fafb', bodyColor: '#d1d5db' },
+          },
+          scales: {
+            x:     { grid: { color: '#1f2937' }, ticks: { color: '#6b7280' } },
+            yTemp: {
+              type: 'linear', position: 'left',
+              grid: { color: '#1f2937' },
+              ticks: { color: '#ef4444', callback: v => `${v}°C` },
+            },
+            yCO2: {
+              type: 'linear', position: 'right',
+              grid: { drawOnChartArea: false },
+              ticks: { color: '#F59E0B', callback: v => `${v}ppm` },
+            },
+          },
+        },
+      });
+    })();
+
+    /* ---- Mobile sidebar toggle ---- */
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('sidebar--open');
+    });
+
+    /* ---- Live "last updated" clock ---- */
+    (function tick() {
+      const el = document.getElementById('last-update-time');
+      if (el) el.textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      setTimeout(tick, 60_000);
+    })();
+  </script>
+
+</body>
+</html>
